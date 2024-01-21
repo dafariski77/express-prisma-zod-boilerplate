@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js",
     "db": "docker-compose up postgres",
     "db:reset": "yarn prisma migrate reset --force && yarn prisma migrate dev",
     "db:up": "yarn prisma migrate dev",
