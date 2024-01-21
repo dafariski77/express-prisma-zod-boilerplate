@@ -4,7 +4,8 @@ import morgan from "morgan";
 import http from "http";
 import errorHandlerMiddleware from "./middlewares/handleError.js";
 import cors from "cors";
-import routes from './routes/index.js'
+import routes from "./routes/index.js";
+import handleNotFoundRoute from "./middlewares/notFoundRoute.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use(errorHandlerMiddleware);
+app.use(handleNotFoundRoute);
 
 const server = http.createServer(app);
 
