@@ -8,7 +8,7 @@ import helmet from "helmet";
 import routes from "./routes/index.js";
 import handleNotFoundRoute from "./middlewares/notFoundRoute.js";
 import compression from "compression";
-import xss from "xss";
+import xss from "./middlewares/xss.js";
 
 dotenv.config();
 
