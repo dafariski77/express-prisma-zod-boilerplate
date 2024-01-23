@@ -10,7 +10,7 @@ const validate = (schema) => async (req, res, next) => {
     return next();
   } catch (error) {
     return res.status(400).json({
-      status: "error",
+      success: false,
       message: zodError(error),
       data: null,
     });
