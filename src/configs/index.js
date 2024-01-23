@@ -14,4 +14,5 @@ export default {
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleClientRedirect: process.env.GOOGLE_CLIENT_REDIRECT,
+  certLocation: process.env.CERT_LOCATION
 };
