@@ -1,12 +1,96 @@
 import passport from "passport";
-import { createToken } from "../lib/jwt.js";
+import { createRefreshJWT, createToken } from "../lib/jwt.js";
 import { createTokenUser } from "../utils/createToken.js";
 import { useFacebookStrategy, useGoogleStrategy } from "../lib/passport.js";
 import configs from "../configs/index.js";
+import BadRequestError from "../errors/badRequest.js";
+import { compare, encrypt } from "../lib/bcrypt.js";
+import prisma from "../lib/prisma.js";
+import generateOtpNumber from "../utils/random.js";
+import { otpMail } from "../utils/sendMail.js";
 
-const register = (req, res, next) => {
+const register = async (req, res, next) => {
   try {
-    return res.send("hello");
+    const { fullname, email, password, passwordConfirmation } = req.body;
+
+    if (password !== passwordConfirmation) {
+      throw new BadRequestError("Password tidak cocok!");
+    }
+
+    const hashPassword = await encrypt(password);
+
+    const user = await prisma.user.create({
+      data: {
+        fullname,
+        email,
+        password: hashPassword,
+        otp: generateOtpNumber(),
+      },
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        otp: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await otpMail(email, user);
+
+    return res.json({
+      success: true,
+      message: "Berhasil mendaftar akun!",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestError("Kredensial tidak valid!");
+    }
+
+    const comparePassword = await compare(password, user.password);
+
+    if (!comparePassword) {
+      throw new BadRequestError("Password salah!");
+    }
+
+    const token = createToken({ payload: createTokenUser(user) });
+
+    const refreshToken = createRefreshJWT({ payload: createTokenUser(user) });
+
+    await prisma.refreshToken.create({
+      data: {
+        refreshToken,
+        userId: user.id,
+      },
+    });
+
+    return res.json({
+      access_token: token,
+      refresh_token: refreshToken,
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+      },
+    }).status(200);
   } catch (error) {
     next(error);
   }
@@ -98,6 +182,7 @@ const facebookCallback = (req, res, next) => {
 
 export default {
   register,
+  login,
   googleCallback,
   getGoogleUrl,
   getFacebookUrl,

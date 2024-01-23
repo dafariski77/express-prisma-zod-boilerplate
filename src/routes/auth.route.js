@@ -2,6 +2,8 @@ import express from "express";
 import passport from "passport";
 import { authController } from "../controllers/index.js";
 import { useFacebookStrategy, useGoogleStrategy } from "../lib/passport.js";
+import authValidation from "../validations/auth.validation.js";
+import validate from "../middlewares/validate.js";
 // import validate from '../middlewares/validate.js'
 
 const router = express.Router();
@@ -32,5 +34,13 @@ router.get(
   }),
   authController.facebookCallback
 );
+
+// basic auth
+router.post(
+  "/register",
+  validate(authValidation.register),
+  authController.register
+);
+router.post("/login", validate(authValidation.login), authController.login);
 
 export default router;
