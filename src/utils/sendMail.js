@@ -13,8 +13,6 @@ export const otpMail = async (email, data) => {
       html: mustache.render(template, data),
     };
 
-    console.log(data);
-
     return await transporter.sendMail(message);
   } catch (error) {
     console.log(error);
