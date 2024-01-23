@@ -20,7 +20,7 @@ export const useGoogleStrategy = () => {
       async (req, accessToken, refreshToken, profile, done) => {
         try {
           if (!profile._json.email) {
-            throw BadRequestError("User does not have email");
+            throw new BadRequestError("User does not have email");
           }
 
           let user = await prisma.user.findFirst({
@@ -63,7 +63,7 @@ export const useFacebookStrategy = () => {
       async (req, accessToken, refreshToken, profile, done) => {
         try {
           if (!profile.emails || profile.emails.length === 0) {
-            throw BadRequestError("User does not have email");
+            throw new BadRequestError("User does not have email");
           }
 
           const email = profile.emails[0].value;
