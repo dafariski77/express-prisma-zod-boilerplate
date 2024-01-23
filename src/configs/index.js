@@ -10,6 +10,7 @@ export default {
   smtpPassword: process.env.SMTP_PASSWORD,
   facebookClientId: process.env.FACEBOOK_CLIENT_ID,
   facebookClientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+  facebookClientRedirect: process.env.FACEBOOK_CLIENT_REDIRECT,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleClientRedirect: process.env.GOOGLE_CLIENT_REDIRECT,
