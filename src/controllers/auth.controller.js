@@ -63,8 +63,8 @@ const login = async (req, res, next) => {
       throw new BadRequestError("Kredensial tidak valid!");
     }
 
-    if(!user.isVerified) {
-      throw new BadRequestError("Akun belum diverifikasi!")
+    if (!user.isVerified) {
+      throw new BadRequestError("Akun belum diverifikasi!");
     }
 
     const comparePassword = await compare(password, user.password);
@@ -84,17 +84,75 @@ const login = async (req, res, next) => {
       },
     });
 
-    return res.json({
-      access_token: token,
-      refresh_token: refreshToken,
-      user: {
-        id: user.id,
-        fullname: user.fullname,
-        email: user.email,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
+    return res
+      .json({
+        success: true,
+        message: "Berhasil masuk!",
+        data: {
+          access_token: token,
+          refresh_token: refreshToken,
+          user: {
+            id: user.id,
+            fullname: user.fullname,
+            email: user.email,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+          },
+        },
+      })
+      .status(200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verify = async (req, res, next) => {
+  try {
+    const { otp, email } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
       },
-    }).status(200);
+    });
+
+    if (!user) {
+      throw new BadRequestError("User tidak ditemukan!");
+    }
+
+    if (user.isVerified === true) {
+      throw new BadRequestError("Akun sudah diverifikasi");
+    }
+
+    if (otp !== user.otp) {
+      throw new BadRequestError("OTP tidak valid!");
+    }
+
+    const verifiedUser = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        isVerified: true,
+      },
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        otp: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res
+      .json({
+        success: true,
+        message: "Verifikasi berhasil!",
+        data: verifiedUser,
+      })
+      .status(200);
   } catch (error) {
     next(error);
   }
@@ -187,6 +245,7 @@ const facebookCallback = (req, res, next) => {
 export default {
   register,
   login,
+  verify,
   googleCallback,
   getGoogleUrl,
   getFacebookUrl,
