@@ -63,6 +63,10 @@ const login = async (req, res, next) => {
       throw new BadRequestError("Kredensial tidak valid!");
     }
 
+    if(!user.isVerified) {
+      throw new BadRequestError("Akun belum diverifikasi!")
+    }
+
     const comparePassword = await compare(password, user.password);
 
     if (!comparePassword) {
