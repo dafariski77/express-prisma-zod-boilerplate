@@ -8,6 +8,7 @@ import { compare, encrypt } from "../lib/bcrypt.js";
 import prisma from "../lib/prisma.js";
 import generateOtpNumber from "../utils/random.js";
 import { otpMail } from "../utils/sendMail.js";
+import apiSuccess from "../utils/apiSuccess.js";
 
 const register = async (req, res, next) => {
   try {
@@ -39,11 +40,7 @@ const register = async (req, res, next) => {
 
     await otpMail(email, user);
 
-    return res.json({
-      success: true,
-      message: "Berhasil mendaftar akun!",
-      data: user,
-    });
+    return apiSuccess(res, "Berhasil mendaftar akun!", user);
   } catch (error) {
     next(error);
   }
@@ -84,23 +81,19 @@ const login = async (req, res, next) => {
       },
     });
 
-    return res
-      .json({
-        success: true,
-        message: "Berhasil masuk!",
-        data: {
-          access_token: token,
-          refresh_token: refreshToken,
-          user: {
-            id: user.id,
-            fullname: user.fullname,
-            email: user.email,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          },
-        },
-      })
-      .status(200);
+    const response = {
+      access_token: token,
+      refresh_token: refreshToken,
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+      },
+    };
+
+    return apiSuccess(res, "Berhasil masuk!", response);
   } catch (error) {
     next(error);
   }
@@ -146,13 +139,7 @@ const verify = async (req, res, next) => {
       },
     });
 
-    return res
-      .json({
-        success: true,
-        message: "Verifikasi berhasil!",
-        data: verifiedUser,
-      })
-      .status(200);
+    return apiSuccess(res, "Verifikasi berhasil", verifiedUser);
   } catch (error) {
     next(error);
   }
