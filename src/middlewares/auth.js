@@ -27,6 +27,16 @@ export const authenticateUser = async (req, res, next) => {
 
     const payload = isTokenValid({ token });
 
+    const user = await prisma.user.findFirst({
+      where: {
+        id: payload.id,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthenticatedError("Authentication invalid!");
+    }
+
     req.user = {
       id: payload.id,
       fullname: payload.fullname,
